@@ -8,6 +8,7 @@
 / {
 	aliases {
 		mmc0 = &sdmmc1;
+		mmc1 = &sdmmc2;
 		usb0 = &usbotg_hs;
 	};
 
@@ -15,7 +16,7 @@
 		u-boot,boot-led = "led-blue";
 		u-boot,error-led = "led-red";
 		u-boot,mmc-env-partition = "u-boot-env";
-		st,adc_usb_pd = <&adc1 6>, <&adc1 12>;
+		/*st,adc_usb_pd = <&adc1 6>, <&adc1 12>;*/
 		st,fastboot-gpios = <&gpioa 13 (GPIO_ACTIVE_LOW | GPIO_PULL_UP)>;
 		st,stm32prog-gpios = <&gpioa 14 (GPIO_ACTIVE_LOW | GPIO_PULL_UP)>;
 	};
@@ -23,14 +24,14 @@
 	leds {
 		led-red {
 			color = <LED_COLOR_ID_RED>;
-			gpios = <&gpioa 13 GPIO_ACTIVE_LOW>;
+			gpios = <&gpioh 2 GPIO_ACTIVE_HIGH>;
 			default-state = "off";
 		};
 	};
 };
 
 &adc_1 {
-	status = "okay";
+	status = "disabled";
 };
 
 &panel_rgb {
@@ -38,15 +39,18 @@
 
 	display-timings {
 		timing@0 {
-			clock-frequency = <10000000>;
-			hactive = <480>;
-			vactive = <272>;
-			hfront-porch = <10>;
-			hback-porch = <10>;
-			hsync-len = <52>;
-			vfront-porch = <10>;
-			vback-porch = <10>;
-			vsync-len = <10>;
+			clock-frequency = <27000000>;
+			hactive = <800>;
+			vactive = <480>;
+
+			hsync-len = <1>;
+			hfront-porch = <40>;
+			hback-porch = <46>;
+
+			vsync-len = <3>;
+			vfront-porch = <13>;
+			vback-porch = <23>;
+
 			hsync-active = <0>;
 			vsync-active = <0>;
 			de-active = <1>;
