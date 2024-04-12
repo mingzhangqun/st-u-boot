@@ -178,8 +178,26 @@ static int handshake(uint32_t *ptr, uint32_t mask, uint32_t done, int usec)
 
 static int ehci_reset(struct ehci_ctrl *ctrl)
 {
-	uint32_t cmd;
-	int ret = 0;
+	uint32_t cmd, reg;
+	int ret = 0, i;
+	int max_ports = HCS_N_PORTS(ehci_readl(&ctrl->hccr->cr_hcsparams));
+
+	for (i = 0; i < max_ports; i++) {
+		reg = ehci_readl(&ctrl->hcor->or_portsc[i]);
+		if (reg & EHCI_PS_SUSP) {
+			reg &= ~EHCI_PS_CLEAR;
+			reg |= EHCI_PS_FPR;
+			ehci_writel(&ctrl->hcor->or_portsc[i], reg);
+		}
+	}
+	mdelay(USB_RESUME_TIMEOUT);
+	for (i = 0; i < max_ports; i++) {
+		reg = ehci_readl(&ctrl->hcor->or_portsc[i]);
+		if (reg & EHCI_PS_FPR) {
+			reg &= ~(EHCI_PS_CLEAR | EHCI_PS_SUSP | EHCI_PS_FPR);
+			ehci_writel(&ctrl->hcor->or_portsc[i], reg);
+		}
+	}
 
 	cmd = ehci_readl(&ctrl->hcor->or_usbcmd);
 	cmd = (cmd & ~CMD_RUN) | CMD_RESET;
@@ -1766,70 +1784,4 @@ struct dm_usb_ops ehci_usb_ops = {
 	.lock_async = ehci_lock_async,
 };
 
-#endif
-
-#ifdef CONFIG_PHY
-int ehci_setup_phy(struct udevice *dev, struct phy *phy, int index)
-{
-	int ret;
-
-	if (!phy)
-		return 0;
-
-	ret = generic_phy_get_by_index(dev, index, phy);
-	if (ret) {
-		if (ret != -ENOENT) {
-			dev_err(dev, "failed to get usb phy\n");
-			return ret;
-		}
-	} else {
-		ret = generic_phy_init(phy);
-		if (ret) {
-			dev_dbg(dev, "failed to init usb phy\n");
-			return ret;
-		}
-
-		ret = generic_phy_power_on(phy);
-		if (ret) {
-			dev_dbg(dev, "failed to power on usb phy\n");
-			return generic_phy_exit(phy);
-		}
-	}
-
-	return 0;
-}
-
-int ehci_shutdown_phy(struct udevice *dev, struct phy *phy)
-{
-	int ret = 0;
-
-	if (!phy)
-		return 0;
-
-	if (generic_phy_valid(phy)) {
-		ret = generic_phy_power_off(phy);
-		if (ret) {
-			dev_dbg(dev, "failed to power off usb phy\n");
-			return ret;
-		}
-
-		ret = generic_phy_exit(phy);
-		if (ret) {
-			dev_dbg(dev, "failed to power off usb phy\n");
-			return ret;
-		}
-	}
-
-	return 0;
-}
-#else
-int ehci_setup_phy(struct udevice *dev, struct phy *phy, int index)
-{
-	return 0;
-}
-
-int ehci_shutdown_phy(struct udevice *dev, struct phy *phy)
-{
-	return 0;
-}
 #endif

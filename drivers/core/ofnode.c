@@ -653,13 +653,16 @@ int ofnode_decode_display_timing(ofnode parent, int index,
 	int ret = 0;
 
 	timings = ofnode_find_subnode(parent, "display-timings");
-	if (!ofnode_valid(timings))
-		return -EINVAL;
-
-	i = 0;
-	ofnode_for_each_subnode(node, timings) {
-		if (i++ == index)
-			break;
+	if (ofnode_valid(timings)) {
+		i = 0;
+		ofnode_for_each_subnode(node, timings) {
+			if (i++ == index)
+				break;
+		}
+	} else {
+		if (index != 0)
+			return -EINVAL;
+		node = ofnode_find_subnode(parent, "panel-timing");
 	}
 
 	if (!ofnode_valid(node))
@@ -704,6 +707,53 @@ int ofnode_decode_display_timing(ofnode parent, int index,
 	if (ofnode_read_bool(node, "doublescan"))
 		dt->flags |= DISPLAY_FLAGS_DOUBLESCAN;
 	if (ofnode_read_bool(node, "doubleclk"))
+		dt->flags |= DISPLAY_FLAGS_DOUBLECLK;
+
+	return ret;
+}
+
+int ofnode_decode_panel_timing(ofnode parent,
+			       struct display_timing *dt)
+{
+	ofnode timings;
+	u32 val = 0;
+	int ret = 0;
+
+	timings = ofnode_find_subnode(parent, "panel-timing");
+	if (!ofnode_valid(timings))
+		return -EINVAL;
+	memset(dt, 0, sizeof(*dt));
+	ret |= decode_timing_property(timings, "hback-porch", &dt->hback_porch);
+	ret |= decode_timing_property(timings, "hfront-porch", &dt->hfront_porch);
+	ret |= decode_timing_property(timings, "hactive", &dt->hactive);
+	ret |= decode_timing_property(timings, "hsync-len", &dt->hsync_len);
+	ret |= decode_timing_property(timings, "vback-porch", &dt->vback_porch);
+	ret |= decode_timing_property(timings, "vfront-porch", &dt->vfront_porch);
+	ret |= decode_timing_property(timings, "vactive", &dt->vactive);
+	ret |= decode_timing_property(timings, "vsync-len", &dt->vsync_len);
+	ret |= decode_timing_property(timings, "clock-frequency", &dt->pixelclock);
+	dt->flags = 0;
+	if (!ofnode_read_u32(timings, "vsync-active", &val)) {
+		dt->flags |= val ? DISPLAY_FLAGS_VSYNC_HIGH :
+		    DISPLAY_FLAGS_VSYNC_LOW;
+	}
+	if (!ofnode_read_u32(timings, "hsync-active", &val)) {
+		dt->flags |= val ? DISPLAY_FLAGS_HSYNC_HIGH :
+		    DISPLAY_FLAGS_HSYNC_LOW;
+	}
+	if (!ofnode_read_u32(timings, "de-active", &val)) {
+		dt->flags |= val ? DISPLAY_FLAGS_DE_HIGH :
+		    DISPLAY_FLAGS_DE_LOW;
+	}
+	if (!ofnode_read_u32(timings, "pixelclk-active", &val)) {
+		dt->flags |= val ? DISPLAY_FLAGS_PIXDATA_POSEDGE :
+		DISPLAY_FLAGS_PIXDATA_NEGEDGE;
+	}
+	if (ofnode_read_bool(timings, "interlaced"))
+		dt->flags |= DISPLAY_FLAGS_INTERLACED;
+	if (ofnode_read_bool(timings, "doublescan"))
+		dt->flags |= DISPLAY_FLAGS_DOUBLESCAN;
+	if (ofnode_read_bool(timings, "doubleclk"))
 		dt->flags |= DISPLAY_FLAGS_DOUBLECLK;
 
 	return ret;

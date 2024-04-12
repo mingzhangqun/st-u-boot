@@ -351,6 +351,17 @@ int generic_phy_configure(struct phy *phy, void *params)
 	return ops->configure ? ops->configure(phy, params) : 0;
 }
 
+int generic_phy_set_mode(struct phy *phy, enum phy_mode mode, int submode)
+{
+	struct phy_ops const *ops;
+
+	if (!generic_phy_valid(phy))
+		return 0;
+	ops = phy_dev_ops(phy->dev);
+
+	return ops->set_mode ? ops->set_mode(phy, mode, submode) : 0;
+}
+
 int generic_phy_get_bulk(struct udevice *dev, struct phy_bulk *bulk)
 {
 	int i, ret, count;
@@ -453,6 +464,64 @@ int generic_phy_power_off_bulk(struct phy_bulk *bulk)
 		ret |= generic_phy_power_off(&phys[i]);
 
 	return ret;
+}
+
+int generic_setup_phy(struct udevice *dev, struct phy *phy, int index)
+{
+	int ret = 0;
+
+	if (!phy)
+		return 0;
+
+	ret = generic_phy_get_by_index(dev, index, phy);
+	if (ret) {
+		if (ret != -ENOENT)
+			return ret;
+	} else {
+		ret = generic_phy_init(phy);
+		if (ret)
+			return ret;
+
+		ret = generic_phy_power_on(phy);
+		if (ret)
+			ret = generic_phy_exit(phy);
+	}
+
+	return ret;
+}
+
+int generic_shutdown_phy(struct phy *phy)
+{
+	int ret = 0;
+
+	if (!phy)
+		return 0;
+
+	if (generic_phy_valid(phy)) {
+		ret = generic_phy_power_off(phy);
+		if (ret)
+			return ret;
+
+		ret = generic_phy_exit(phy);
+	}
+
+	return ret;
+}
+
+int generic_phy_set_mode_bulk(struct phy_bulk *bulk, enum phy_mode mode, int submode)
+{
+	struct phy *phys = bulk->phys;
+	int i, ret;
+
+	for (i = 0; i < bulk->count; i++) {
+		ret = generic_phy_set_mode(&phys[i], mode, submode);
+		if (ret) {
+			pr_err("Can't set mode on PHY%d\n", i);
+			return ret;
+		}
+	}
+
+	return 0;
 }
 
 UCLASS_DRIVER(phy) = {
