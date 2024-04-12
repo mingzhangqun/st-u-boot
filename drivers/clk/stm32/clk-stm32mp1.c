@@ -550,6 +550,7 @@ static const struct stm32mp1_clk_gate stm32mp1_clk_gate[] = {
 	STM32MP1_CLK_SET_CLR_F(RCC_MP_APB4ENSETR, 0, LTDC_PX, _PLL4_Q),
 	STM32MP1_CLK_SET_CLR_F(RCC_MP_APB4ENSETR, 4, DSI_PX, _PLL4_Q),
 	STM32MP1_CLK_SET_CLR(RCC_MP_APB4ENSETR, 4, DSI_K, _DSI_SEL),
+	STM32MP1_CLK_SET_CLR(RCC_MP_APB4ENSETR, 4, DSI, _PLL4_P),
 	STM32MP1_CLK_SET_CLR(RCC_MP_APB4ENSETR, 8, DDRPERFM, _UNKNOWN_SEL),
 	STM32MP1_CLK_SET_CLR(RCC_MP_APB4ENSETR, 15, IWDG2, _UNKNOWN_SEL),
 	STM32MP1_CLK_SET_CLR(RCC_MP_APB4ENSETR, 16, USBPHY_K, _USBPHY_SEL),
@@ -881,7 +882,8 @@ static int stm32mp1_clk_get_parent(struct stm32mp1_clk_priv *priv,
 		return sel[s].parent[p];
 	}
 
-	log_err("no parents defined for clk id %d\n", (u32)id);
+	/* clock is DISABLED when the clock src is not in clk_parent[] range */
+	log_debug("no parents defined for clk id %d\n", (u32)id);
 
 	return -EINVAL;
 }
