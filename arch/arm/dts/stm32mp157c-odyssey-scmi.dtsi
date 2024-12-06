@@ -89,6 +89,14 @@
 	clocks = <&scmi_clk CK_SCMI_RTCAPB>, <&scmi_clk CK_SCMI_RTC>;
 };
 
+<<<<<<< HEAD:arch/arm/dts/stm32mp157c-odyssey-scmi.dtsi
+=======
+&spi6 {
+	clocks = <&scmi_clk CK_SCMI_SPI6>;
+	resets = <&scmi_reset RST_SCMI_SPI6>;
+};
+
+>>>>>>> e88ba47c138ebc4ae96a9889008e81a11c358955:arch/arm/dts/stm32mp157c-ed1-scmi.dtsi
 &usart1 {
 	clocks = <&scmi_clk CK_SCMI_USART1>;
 };

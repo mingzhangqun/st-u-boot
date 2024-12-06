@@ -8,8 +8,13 @@
 
 / {
 	reserved-memory {
+<<<<<<< HEAD
 		optee@fe000000 {
 			reg = <0xfe000000 0x2000000>;
+=======
+		optee@de000000 {
+			reg = <0xde000000 0x2000000>;
+>>>>>>> e88ba47c138ebc4ae96a9889008e81a11c358955
 			no-map;
 		};
 	};
@@ -89,11 +94,20 @@
 	clocks = <&scmi_clk CK_SCMI_RTCAPB>, <&scmi_clk CK_SCMI_RTC>;
 };
 
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD:arch/arm/dts/stm32mp157c-odyssey-scmi.dtsi
+=======
+>>>>>>> e88ba47c138ebc4ae96a9889008e81a11c358955
 &spi6 {
 	clocks = <&scmi_clk CK_SCMI_SPI6>;
 	resets = <&scmi_reset RST_SCMI_SPI6>;
 };
 
+<<<<<<< HEAD
+=======
+>>>>>>> e88ba47c138ebc4ae96a9889008e81a11c358955:arch/arm/dts/stm32mp157c-ed1-scmi.dtsi
+>>>>>>> e88ba47c138ebc4ae96a9889008e81a11c358955
 &usart1 {
 	clocks = <&scmi_clk CK_SCMI_USART1>;
 };
