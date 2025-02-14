@@ -877,7 +877,8 @@ int board_late_init(void)
 		fdt_compat = ofnode_get_property(ofnode_root(), "compatible",
 						 &fdt_compat_len);
 		if (fdt_compat && fdt_compat_len) {
-			if (strncmp(fdt_compat, "st,", 3) != 0) {
+			if ((strncmp(fdt_compat, "st,", 3) != 0) \
+				|| (strncmp(fdt_compat, "seeed,", 6) != 0)) {
 				env_set("board_name", fdt_compat);
 			} else {
 				env_set("board_name", fdt_compat + 3);
