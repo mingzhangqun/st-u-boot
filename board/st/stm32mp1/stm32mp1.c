@@ -877,14 +877,17 @@ int board_late_init(void)
 		fdt_compat = ofnode_get_property(ofnode_root(), "compatible",
 						 &fdt_compat_len);
 		if (fdt_compat && fdt_compat_len) {
-			if (strncmp(fdt_compat, "st,", 3) != 0) {
+			if ((strncmp(fdt_compat, "st,", 3) != 0) \
+				&& (strncmp(fdt_compat, "seeed,", 6) != 0)) {
 				env_set("board_name", fdt_compat);
 			} else {
-				env_set("board_name", fdt_compat + 3);
+				char *board_name = strchr(fdt_compat, ',');
+				board_name++;
+				env_set("board_name", board_name);
 
 				buf_len = sizeof(dtb_name);
-				strncpy(dtb_name, fdt_compat + 3, buf_len);
-				buf_len -= strlen(fdt_compat + 3);
+				strncpy(dtb_name, board_name, buf_len);
+				buf_len -= strlen(board_name);
 				strncat(dtb_name, ".dtb", buf_len);
 				env_set("fdtfile", dtb_name);
 			}

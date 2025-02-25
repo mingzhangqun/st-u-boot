@@ -6,11 +6,12 @@
 /dts-v1/;
 
 #include "stm32mp157c-odyssey-som.dtsi"
+//#include "stm32mp157c-odyssey-scmi.dtsi"
 
 / {
 
 	model = "Seeed Studio Odyssey-STM32MP157C Board";
-	compatible = "seeed,odyssey-stm32mp157c", "st,stm32mp157";
+	compatible = "seeed,stm32mp157c-odyssey", "st,stm32mp157";
 
 	aliases {
 		ethernet0 = &ethernet0;
@@ -31,6 +32,29 @@
 		};
 	};
 
+	firmware {
+		optee: optee {
+			compatible = "linaro,optee-tz";
+			method = "smc";
+		};
+
+		scmi: scmi {
+			compatible = "linaro,scmi-optee";
+			#address-cells = <1>;
+			#size-cells = <0>;
+			linaro,optee-channel-id = <0>;
+
+			scmi_clk: protocol@14 {
+				reg = <0x14>;
+				#clock-cells = <1>;
+			};
+
+			scmi_reset: protocol@16 {
+				reg = <0x16>;
+				#reset-cells = <1>;
+			};
+		};
+	};
 };
 
 &adc {

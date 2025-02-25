@@ -16,7 +16,7 @@
 / {
 
 	model = "Seeed Studio Odyssey-STM32MP157C SOM";
-	compatible = "seeed,odyssey-stm32mp157c-som", "st,stm32mp157";
+	compatible = "seeed,stm32mp157c-odyssey-som", "st,stm32mp157";
 
 	memory@c0000000 {
 		device_type = "memory";
@@ -368,4 +368,12 @@
 	regulator-max-microvolt = <2500000>;
 	vdda-supply = <&vdd>;
 	status = "okay";
+};
+
+&cpu0{
+	cpu-supply = <&vddcore>;
+};
+
+&cpu1{
+	cpu-supply = <&vddcore>;
 };
