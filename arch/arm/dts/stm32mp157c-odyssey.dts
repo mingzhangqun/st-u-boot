@@ -99,13 +99,18 @@
 	phy-mode = "rgmii-id";
 	max-speed = <1000>;
 	phy-handle = <&phy0>;
+	st,eth-clk-sel;
 
 	mdio0 {
+		status = "okay";
 		#address-cells = <1>;
 		#size-cells = <0>;
 		compatible = "snps,dwmac-mdio";
-		phy0: ethernet-phy@0 {
-			reg = <0>;
+		snps,reset-active-low;
+		snps,reset-gpio=<&gpiog 0 GPIO_ACTIVE_LOW>;
+
+		phy0: ethernet-phy@7 {
+			reg = <7>;
 		};
 	};
 };
